@@ -1,0 +1,20 @@
+
+Humans have a remarkable ability to understand dynamic scenes from videos including estimating the 3D structure as well as finding correspondence at different time stamps. For example, when opening a fridge, one can track the door of the fridge and estimate the state and shape of the fridge.
+Many prior works~\cite{schonberger2016structure, Luo-VideoDepth-2020, lin2019photometric} infer the 3D structure of a static scene from videos. Other lines of works~\cite{sarlin20superglue,CVPR2019_CycleTime,sarlin20superglue, jabri2020walk} solve the ``what went where" \cite{Wills03} problem of dynamic scenes. However, estimating the 3D structure from videos of {\em dynamic} scenes is still a challenging problem. The classical method Structure from Motion (SfM) is limited to only static scenes~\cite{schonberger2016structure, schwarz1978estimating, ozden2010multibody}. In addition, video datasets with annotations for temporal visual correspondences are scarcely available and hard to create, making supervision a bottleneck for object tracking~\cite{li2019joint, wu2013online}. 
+
+
+
+% Many prior works modeled video as a spatio-temporal $XYT$ volume by treating time as another dimension apart from spatial information~\cite{carreira2018quo, Niyogi94analyzinggait, DBLP:conf/cvpr/Zelnik-ManorI01}. However, as the object or the camera could move in arbitrary directions, such method has limits that the physical point depicted at position $(x, y)$ in frame $t$ might not have any relation to what we find at that same $(x, y)$ in frame $t + k$  \cite{feichtenhofer2019slowfast, jabri2020walk}. As a consequence, the notion of \textit{temporal correspondence} — ``what went where" \cite{DBLP:conf/cvpr/WillsAB03} — become crucial for learning about objects in dynamic scenes.
+
+% Recent approaches for self-supervised representation learning are highly effective when pairs of matching views are assumed to be known \cite{DBLP:conf/icml/ChenK0H20, DBLP:conf/cvpr/ChopraHL05, DBLP:journals/pami/DosovitskiyFSRB16, DBLP:conf/cvpr/He0WXG20, DBLP:conf/iclr/HjelmFLGBTB19, DBLP:conf/eccv/TianKI20, DBLP:journals/corr/abs-1807-03748, DBLP:conf/cvpr/WuXYL18, DBLP:conf/cvpr/Zelnik-ManorI01}\ljnote{We need to fix citations, some e.g. [4] looks wrong.}, e.g. constructed via data augmentation, yet data augmentation does not seem promising for creating temporal correspondences. 
+
+% adding 3D information to unsupervised tracking.
+
+In this work, we propose to estimate the 3D structure of dynamic scenes by combining a 3D detection system with a self-supervised visual temporal correspondence learning system.
+We reconstruct plane structures from video frames and track the reconstructed planes in dynamic scenes. 
+The core methodology of this work is highly inspired by~\cite{jabri2020walk} from Jabri \etal. We incorporate 3D planar surfaces information obtained from PlaneRCNN~\cite{liu2019planercnn} of each frame into the framework of~\cite{jabri2020walk}, which offers important geometric constraint for patch affinity prediction in dynamic scenes. 
+%\cite{Chella00understandingdynamic, Ullman85theoptical, 879791}. 
+
+% based on the fact that human visual system can recover the 3D shape of moving objects on the basis of motion information alone \cite{Chella00understandingdynamic, Ullman85theoptical, 879791}. 
+
+% PlaneRCNN (patch ,geometric constraint), provides signals for unsupervised learning, cheat classifier.

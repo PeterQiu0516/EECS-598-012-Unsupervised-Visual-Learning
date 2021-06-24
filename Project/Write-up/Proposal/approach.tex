@@ -1,0 +1,47 @@
+
+% \subsection{Visual Encoder Pretraining}
+% We will use the contrastive random walk in \cite{jabri2020walk} to pretrain a visual encoder that transfer the raw video frames into high dimensional features. We will model the whole frames in the video as a Markov chain. We will use the stochastic matrix of affinities 
+% \begin{eqnarray}
+% \label{eqn_affinities}
+% A_{t}^{t+1}(i, j) &=& \operatorname{softmax}\left(Q_{t} Q_{t+1}^{\top}\right)_{i j}\nonumber\\
+% &=&\frac{\exp \left(d_{\phi}\left(\mathbf{q}_{t}^{i}, \mathbf{q}_{t+1}^{j}\right) / \tau\right)}{\sum_{l=1}^{N} \exp \left(d_{\phi}\left(\mathbf{q}_{t}^{i}, \mathbf{q}_{t+1}^{l}\right) / \tau\right)}
+% \end{eqnarray}
+% to describe the local affinity between the two adjacent video frames. Then, the long-range correspondences in this Markov chain is: 
+% \begin{equation}
+% \label{eqn_long-range_corsp}
+% \bar{A}_{t}^{t+k}=\prod_{i=0}^{k-1} A_{t+i}^{t+i+1}=P\left(X_{t+k} \mid X_{t}\right).
+% \end{equation}
+% We will guide the walk by maximizing the likelihood of the walker being at the query node at time $t$ and at the target node at time $t + k$:
+% \begin{eqnarray}
+% \label{eqn_likelihood}
+% \mathcal{L}_{\text {sup }}&=&\mathcal{L}_{C E}\left(\bar{A}_{t}^{t+k}, Y_{t}^{t+k}\right)\nonumber\\
+% &=&-\sum_{i=1}^{N} \log P\left(X_{t+k}=Y_{t}^{t+k}(i) \mid X_{t}=i\right)
+% \end{eqnarray}
+% We will use the cycle likelihood that walks from the query node to the target node and inversely to complete the self-supervision:
+% \begin{eqnarray}
+% \label{eqn_cycle_likelihood}
+% \mathcal{L}_{c y c}^{k}&=&\mathcal{L}_{C E}\left(\bar{A}_{t}^{t+k} \bar{A}_{t+k}^{t}, I\right)\nonumber\\
+% &=&-\sum_{i=1}^{N} \log P\left(X_{t+2 k}=i \mid X_{t}=i\right)
+% \end{eqnarray}
+% The same as in \cite{jabri2020walk}, we will use the edge dropout in \cite{srivastava2014dropout} to reproduce the same network.
+
+% \subsection{3D Reconstruction from the Visual Features}
+% Instead of doing 3D plane detection and reconstruction from the raw frames in the video in \cite{liu2019planercnn}, we will complete this task using the high dimensional visual features from the pretrained contrastive learning model. We will use Mask R-CNN \cite{he2017mask} to detect the planes. We will apply the changes in \cite{liu2019planercnn} to do the plane normal, depthmap, and plane offset estimation. We will use the ConvAccu network in \cite{liu2019planercnn} to refine the segmentation of the masks of the planes. With the transformed coordinates in adjacent frames based on the camera pose, we will use the normalized L2 norm of the 3D distance of the coordinates as loss to constrain the training. 
+
+We will use PlaneRCNN~\cite{liu2019planercnn} to acquire the plane segmentation and the corresponding plane normal vectors. Then we will combine the normal vectors with the 2D patches in \cite{jabri2020walk} to improve robustness of tracking.
+
+\subsection{Planar Patch and Normal Detection}
+The planar patches are obtained from the refinement network and the plane parameters are obtained from the plane detection module.
+
+\subsection{Normal Assisted Random Walk}
+We incorporate the plane parameters (normal, offset) into the 2D frame patches in the random walk process of~\cite{jabri2020walk}. Only planar patches that has high intersection-over-union (IoU) with the randomly sampled patch will be assigned the plane parameters. 
+
+% We will add an additional \textit{normal} dimension to the 2D patches by checking their dominant plane segmentation, i.e. which segmentation takes up the most area in the patch. If there is no plane segmentation for the patch or no plane segmentation dominates the patch, we will add a flag to the patch as ``no-plane-detected''. 
+
+We assume that the camera displacement between the two frames is not drastic, so that corresponding patches have similar normals. Then our new stochastic matrix of affinities would be:
+\begin{eqnarray}
+\label{eqn_new_affinities}
+A'= A + \lambda F(\text{normal difference}), 
+\end{eqnarray}
+where $A$ is the affinity in~\cite{jabri2020walk} and function $F$ is some geometric function calculating the similarity of the normal of the two adjacent frames when normal exists for both patches. 
+We will leave the rest of our network the same as in \cite{jabri2020walk}.
